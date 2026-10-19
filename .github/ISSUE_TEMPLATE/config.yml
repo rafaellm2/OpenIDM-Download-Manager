@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Vulnerabilidade de segurança / Security Vulnerability
+    url: https://docs.github.com/code-security/security-advisories
+    about: Não abra issue pública — veja o SECURITY.md / Do not open a public issue — see SECURITY.md.

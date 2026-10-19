@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="OpenIDM — Gerenciador de Downloads open source">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#141413"/>
+      <stop offset="1" stop-color="#2a1a14"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f0a35e"/>
+      <stop offset="1" stop-color="#d97757"/>
+    </linearGradient>
+    <linearGradient id="icon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffcc33"/>
+      <stop offset="1" stop-color="#f0a020"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="300" rx="20" fill="url(#bg)"/>
+  <g opacity="0.07" stroke="#ffffff">
+    <path d="M0 60H1200M0 120H1200M0 180H1200M0 240H1200"/>
+  </g>
+
+  <!-- Ícone -->
+  <g transform="translate(90 80)">
+    <rect width="140" height="140" rx="32" fill="url(#icon)"/>
+    <path d="M70 28v58" stroke="#141413" stroke-width="14" stroke-linecap="round"/>
+    <path d="M44 62l26 26 26-26" fill="none" stroke="#141413" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M34 106h72" stroke="#141413" stroke-width="14" stroke-linecap="round"/>
+  </g>
+
+  <!-- Título -->
+  <text x="275" y="140" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="72" font-weight="800" fill="#ffffff">Open<tspan fill="url(#accent)">IDM</tspan></text>
+  <text x="279" y="185" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="26" fill="#d8d4cc">Gerenciador de Downloads open source com segmentação dinâmica</text>
+
+  <!-- Barra de segmentos -->
+  <g transform="translate(279 212)">
+    <rect width="820" height="14" rx="7" fill="#2b2b29"/>
+    <rect width="190" height="14" rx="7" fill="url(#accent)"/>
+    <rect x="205" width="130" height="14" rx="7" fill="url(#accent)" opacity="0.85"/>
+    <rect x="350" width="160" height="14" rx="7" fill="url(#accent)" opacity="0.7"/>
+    <rect x="525" width="90" height="14" rx="7" fill="url(#accent)" opacity="0.55"/>
+    <rect x="630" width="60" height="14" rx="7" fill="url(#accent)" opacity="0.4"/>
+  </g>
+  <text x="279" y="262" font-family="Consolas, Menlo, monospace" font-size="18" fill="#9c978d">Go · Wails v2 · React · SQLite · WebExtension MV3 — Windows 10/11</text>
+</svg>

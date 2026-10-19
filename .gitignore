@@ -1,0 +1,40 @@
+# ─── Saída de compilação ────────────────────────────────────────────
+build/bin/
+build/payload/
+cmd/installer/payload.zip
+*.syso
+*.exe
+!release/**/*.exe
+
+# ─── Frontend ───────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/*
+!frontend/dist/.gitkeep
+frontend/package.json.md5
+frontend/wailsjs/
+
+# ─── Artefatos gerados ao executar o app/instalador na pasta do projeto
+/openidm.ico
+/extension-setup.html
+/com.rafatech.openidm.*.json
+*.oidmpart
+*.sqlite
+*.sqlite-*
+
+# ─── Go ─────────────────────────────────────────────────────────────
+*.test
+*.out
+coverage.*
+
+# ─── Editores e sistema ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ─── Arquivos locais (não publicar) ─────────────────────────────────
+.interno/
+.internal/
+.claude/

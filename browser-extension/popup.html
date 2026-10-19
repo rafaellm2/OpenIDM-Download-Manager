@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>OpenIDM</title>
+  <style>
+    body {
+      width: 330px;
+      margin: 0;
+      padding: 16px;
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+      background: #141413;
+      color: #faf9f5;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #2e2d29;
+    }
+    .title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #faf9f5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .title-logo {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      object-fit: cover;
+    }
+    .badge {
+      font-size: 11px;
+      font-family: "Cascadia Code", Consolas, monospace;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #1e1e1c;
+      border: 1px solid #32312d;
+      color: #a8a499;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      background: #1e1e1c;
+      border: 1px solid #2e2d29;
+      border-radius: 8px;
+      font-size: 12.5px;
+    }
+    input[type="checkbox"] {
+      accent-color: #f4b601;
+      cursor: pointer;
+    }
+    input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #32312d;
+      background: #1e1e1c;
+      color: #faf9f5;
+      font-size: 12px;
+      margin-bottom: 10px;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: #f4b601;
+    }
+    button {
+      width: 100%;
+      padding: 9px;
+      border: 1px solid rgba(244, 182, 1, 0.45);
+      border-radius: 8px;
+      background: #f4b601;
+      color: #181818;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      margin-bottom: 7px;
+      transition: background 0.15s ease;
+    }
+    button:hover {
+      background: #ffc519;
+    }
+    button.secondary {
+      background: #1e1e1c;
+      color: #e5e2d9;
+      border: 1px solid #32312d;
+    }
+    button.secondary:hover {
+      background: #282825;
+      border-color: #46443f;
+    }
+    .hint {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #8c897e;
+      line-height: 1.45;
+    }
+    .hint b {
+      color: #f4b601;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="title"><img src="icons/icon32.png" alt="OpenIDM" class="title-logo" />OpenIDM Desktop</span>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <button id="langBtn" class="secondary" style="width:auto; margin:0; padding:3px 7px; font-size:10.5px; border-radius:999px;" title="Português / English">PT</button>
+      <span id="statusBadge" class="badge">Verificando...</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <span id="captureLabel">Interceptar links de download</span>
+    <input type="checkbox" id="toggleCapture" checked />
+  </div>
+
+  <input type="text" id="manualUrl" placeholder="Cole uma URL para abrir no OpenIDM..." />
+  <button id="sendBtn">Capturar e Salvar na Organização</button>
+  <button id="openAppBtn" class="secondary">Abrir Janela do OpenIDM</button>
+
+  <div class="hint" id="hintText">
+    Ao clicar em um link, a janela nativa do OpenIDM abrirá perguntando onde salvar na sua organização. Segure <b>ALT</b> para ignorar.
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

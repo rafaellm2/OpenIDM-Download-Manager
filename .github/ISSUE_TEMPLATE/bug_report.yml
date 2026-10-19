@@ -1,0 +1,51 @@
+name: 🐞 Relatar bug / Report a Bug
+description: Algo não funciona como esperado / Something isn't working as expected
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Versão do OpenIDM / OpenIDM Version
+      placeholder: "1.0.1"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Versão do Windows / Windows Version
+      placeholder: "Windows 11 23H2"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área afetada / Affected Area
+      options:
+        - Motor de download / Download Engine
+        - Extensão do navegador / Browser Extension
+        - Filas e agendador / Queues & Scheduler
+        - Interface / Card Solto / UI & Compact Card
+        - Instalador / Installer
+        - Outro / Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passos para reproduzir / Steps to Reproduce
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento esperado x obtido / Expected vs. Actual Behavior
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Capturas de tela, logs ou URL de teste pública / Screenshots, Logs, or Public Test URL
+      description: Não inclua URLs privadas, tokens ou senhas. / Do not include private URLs, tokens, or passwords.
