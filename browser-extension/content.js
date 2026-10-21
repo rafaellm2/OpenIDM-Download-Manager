@@ -7,7 +7,62 @@
   }
 
   const CAPTURE_EXT_REGEX =
-    /\.(zip|rar|7z|tar|gz|bz2|xz|tgz|zst|exe|msi|iso|img|apk|dmg|deb|rpm|bat|ps1|mp4|mkv|webm|avi|mov|flv|wmv|m4v|ts|mp3|wav|flac|aac|ogg|m4a|wma|opus|pdf|doc|docx|xls|xlsx|ppt|pptx|epub|csv|safetensors|gguf|ckpt|pt|pth|onnx|bin|whl|torrent)(\?|#|$)/i;
+    /\.(zip|rar|7z|tar|gz|bz2|xz|tgz|zst|exe|msi|iso|img|apk|dmg|deb|rpm|bat|ps1|mp4|mkv|webm|avi|mov|flv|wmv|m4v|mp3|wav|flac|aac|ogg|m4a|wma|opus|pdf|doc|docx|xls|xlsx|ppt|pptx|epub|csv|safetensors|gguf|ckpt|pt|pth|onnx|whl|torrent)(\?|#|$)/i;
+
+  const IGNORED_STREAMING_HOSTS = [
+    "youtube.com",
+    "youtu.be",
+    "googlevideo.com",
+    "ytimg.com",
+    "twitch.tv",
+    "ttvnw.net",
+    "vimeo.com",
+    "dailymotion.com",
+    "tiktok.com",
+    "instagram.com",
+    "facebook.com",
+    "fb.watch",
+    "twitter.com",
+    "x.com",
+    "netflix.com",
+    "primevideo.com",
+    "disneyplus.com",
+    "spotify.com"
+  ];
+
+  // Verifica se o host é local (localhost, 127.0.0.1, ::1, LAN) ou plataforma de streaming de vídeo.
+  function shouldIgnoreHostOrUrl(rawUrl) {
+    try {
+      const u = new URL(rawUrl);
+      if (/\/api\/test-download\//i.test(u.pathname)) {
+        return false;
+      }
+      const h = (u.hostname || "").toLowerCase();
+      if (
+        h === "localhost" ||
+        h === "127.0.0.1" ||
+        h === "::1" ||
+        h === "[::1]" ||
+        h === "0.0.0.0" ||
+        h.endsWith(".localhost") ||
+        h.endsWith(".local") ||
+        /^127\./.test(h) ||
+        /^10\./.test(h) ||
+        /^192\.168\./.test(h) ||
+        /^172\.(1[6-9]|2\d|3[0-1])\./.test(h)
+      ) {
+        return true;
+      }
+      for (const domain of IGNORED_STREAMING_HOSTS) {
+        if (h === domain || h.endsWith("." + domain)) {
+          return true;
+        }
+      }
+    } catch (_e) {
+      return true;
+    }
+    return false;
+  }
 
   function getModifier(e) {
     if (e.altKey) return "ALT";
@@ -85,6 +140,10 @@
 
     const href = anchor.href || "";
     if (!href.startsWith("http://") && !href.startsWith("https://") && !href.startsWith("ftp://")) {
+      return;
+    }
+
+    if (shouldIgnoreHostOrUrl(href) || (!/\/api\/test-download\//i.test(href) && shouldIgnoreHostOrUrl(window.location.href))) {
       return;
     }
 

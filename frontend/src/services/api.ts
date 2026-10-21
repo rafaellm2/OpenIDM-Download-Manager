@@ -9,7 +9,8 @@ import {
   InstallResult,
   Queue,
   SiteLogin,
-  SiteRule
+  SiteRule,
+  UpdateInfo
 } from "../types";
 
 const BRIDGE_BASE = "http://127.0.0.1:41820";
@@ -566,6 +567,51 @@ export const api = {
       method: "POST"
     });
     return res?.extensionDir || "";
+  },
+
+  async checkForUpdates(manual = false): Promise<UpdateInfo> {
+    const w = getWailsApp();
+    if (w?.CheckForUpdates) {
+      return await w.CheckForUpdates(manual);
+    }
+    return await fetchJSON<UpdateInfo>(`/api/update/check?manual=${manual ? "true" : "false"}`);
+  },
+
+  async postponeUpdate(): Promise<number> {
+    const w = getWailsApp();
+    if (w?.PostponeUpdate) {
+      return Number(await w.PostponeUpdate());
+    }
+    const res = await fetchJSON<{ updatePostponedUntil: number }>("/api/update/postpone", {
+      method: "POST"
+    });
+    return Number(res?.updatePostponedUntil || 0);
+  },
+
+  async startSelfUpdate(
+    downloadUrl: string,
+    assetName: string
+  ): Promise<{ status: string; filePath?: string; releaseUrl?: string }> {
+    const w = getWailsApp();
+    if (w?.StartSelfUpdate) {
+      return await w.StartSelfUpdate(downloadUrl, assetName);
+    }
+    return await fetchJSON<{ status: string; filePath?: string; releaseUrl?: string }>(
+      "/api/update/apply",
+      {
+        method: "POST",
+        body: JSON.stringify({ downloadUrl, assetName })
+      }
+    );
+  },
+
+  async openExternalURL(url: string): Promise<void> {
+    const w = getWailsApp();
+    if (w?.OpenExternalURL) {
+      await w.OpenExternalURL(url);
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
   },
 
   subscribeEvents(onEvent: (ev: { type: string; payload: any }) => void): () => void {

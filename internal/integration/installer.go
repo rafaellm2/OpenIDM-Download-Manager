@@ -17,7 +17,7 @@ const (
 	AutoStartRegKey   = `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`
 	AutoStartRegValue = "OpenIDM"
 	UninstallRegKey   = `HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenIDM`
-	AppVersion        = "1.0.0"
+	AppVersion        = "1.0.1"
 	AppPublisher      = "RafaTech"
 	AppDisplayName    = "OpenIDM - Gerenciador de Downloads"
 )

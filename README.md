@@ -89,6 +89,7 @@ Nenhuma linha de código ou binário de terceiros foi reaproveitada: o motor de 
 - **Card Solto** — uma janela compacta, sempre à mão, para acompanhar e controlar os downloads ativos.
 - **Bandeja do sistema** — roda em segundo plano, com menu rápido e notificações nativas traduzidas.
 - **Instância única** — novos links abertos pelo sistema são entregues à janela já aberta.
+- **Atualizador integrado (GitHub Releases)** — botão **🔄 Atualizar** na barra de ferramentas e verificação automática em segundo plano, com opção de **Atualizar Agora** (download e instalação automática) ou **Adiar por 24h**.
 - **Instalador gráfico** próprio bilíngue com atalhos, inicialização com o Windows, desinstalador e ativação da extensão.
 
 ---
@@ -300,10 +301,11 @@ OpenIDM-Download-Manager/
 - [x] **Fase 1** — Motor com segmentação dinâmica, reuso de conexões, retomada, FTP e proxy
 - [x] **Fase 2** — Captura: extensão MV3, Native Messaging, clipboard e exceções por site
 - [x] **Fase 3** — Organização: categorias, filas, agendador, sincronização e antivírus
-- [x] **Internacionalização** — Suporte completo a Inglês (`en-US`) e Português (`pt-BR`) no app, bandeja, instalador, extensão e documentação (v1.0.1)
+- [x] **Internacionalização** — Suporte completo a Inglês (`en-US`) e Português (`pt-BR`) no app, bandeja, instalador, extensão e documentação
+- [x] **Atualização automática pelo aplicativo** — Verificação de novos releases no GitHub com instalação automática e opção de adiar por 24h (v1.0.1)
 - [ ] **Fase 4** — *Site Grabber*: download de sites inteiros com filtros e níveis de exploração
 - [ ] **Fase 5** — Vídeo/streaming: detecção de mídia, HLS/DASH e mux com ffmpeg
-- [ ] Assinatura de código e atualização automática
+- [ ] Assinatura digital de código (EV Code Signing)
 - [ ] Suporte a Linux e macOS
 
 ---

@@ -35,7 +35,7 @@ Your language preference is saved in SQLite (`%APPDATA%\OpenIDM\openidm.sqlite`)
 
 | Area | Purpose |
 |---|---|
-| **Toolbar** | Capture Link, Resume, Pause, Stop All, Delete, Clear Completed, Scheduler, Options, and Installer & Extension |
+| **Toolbar** | Capture Link, Resume, Pause, Stop All, Delete, Clear Completed, Scheduler, Options, Installer & Extension, and Update |
 | **Activity Indicator** | Number of active downloads and real-time aggregate transfer speed |
 | **Search Filter** | Instant filtering by file name or URL |
 | **Compact Card / Minimize to Tray** | Switches to the compact floating card or hides the main window while downloads continue in the background |
@@ -184,10 +184,11 @@ Automatic per-server credentials (`HTTP Basic`, `Bearer Token`, or `FTP`) matche
 ### Proxy / SOCKS5
 Direct connection, System Proxy, manual HTTP/HTTPS proxy, SOCKS5 proxy, or PAC auto-configuration script with optional authentication.
 
-### Folders & Antivirus
+### Folders, Antivirus & Updates
 - Default general downloads folder;
 - SQLite checkpoint interval (seconds);
-- Automatic antivirus scan upon download completion (use `[file]` as the file path placeholder).
+- Automatic antivirus scan upon download completion (use `[file]` as the file path placeholder);
+- **In-App Updates (`🔄 Update` button on Toolbar)**: checks GitHub Releases on demand or automatically in the background. When a new version is published, you can choose **Update Now** (downloads and installs automatically) or **Postpone 24h**.
 
 ---
 

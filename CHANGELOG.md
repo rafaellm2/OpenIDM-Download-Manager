@@ -4,6 +4,23 @@ Todas as mudanças relevantes do OpenIDM são registradas aqui. / All notable ch
 
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adota [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.0.1] — 2026-10-21
+
+### 🔄 Atualização Integrada / In-App Self-Updater & GitHub Releases
+- **Botão "🔄 Atualizar / Update" na Barra de Ferramentas** com selo visual (`Nova! / New!`) quando uma nova versão oficial é publicada no GitHub Releases (`rafaellm2/OpenIDM-Download-Manager`).
+- **Verificação Automática em Segundo Plano**: consulta a API oficial de releases do GitHub ao iniciar o aplicativo e periodicamente a cada 6 horas.
+- **Confirmação de Atualização ou Adiamento por 24h**:
+  - **⬇ Atualizar Agora (`Update Now`)**: baixa o instalador oficial da nova release com barra de progresso em tempo real e executa a atualização silenciosa (`--silent --stop-running --launch-app`), reiniciando o OpenIDM automaticamente já atualizado.
+  - **🕓 Adiar por 24h (`Postpone 24h`)**: persiste o adiamento (`UpdatePostponedUntil`) no banco SQLite e silencia alertas automáticos pelas próximas 24 horas.
+
+### 🛡️ Refinamento Inteligente de Captura / Smart Link & Clipboard Capture Filtering
+- **Filtro contra captura indevida de páginas web comuns**: impede que URLs de sites sem extensão real de arquivo recebam o fallback `download.bin` e disparem captura ao copiar links para a Área de Transferência ou navegar.
+- **Proteção para `localhost` e rede local (LAN)**: ignora automaticamente links locais (`localhost`, `127.0.0.1`, `::1`, `.local`, `.test` e IPs privados de desenvolvimento, incluindo vídeos locais), preservando apenas a rota oficial de teste de instalação (`/api/test-download/`).
+- **Filtro de plataformas de vídeo/streaming**: ignora links de páginas de vídeo do YouTube (`youtube.com`, `youtu.be`), Vimeo, Twitch, TikTok, Instagram, Facebook, X/Twitter, DailyMotion e SoundCloud no monitor de Clipboard e na extensão MV3.
+- **Limpeza de extensões ruidosas**: removidas as extensões `bin`, `ts`, `txt` e `md` da captura automática padrão (com migração automática no SQLite para instalações existentes).
+
+---
+
 ## [1.0.0] — 2026-10-19
 
 Primeira versão pública oficial / Initial official public release.

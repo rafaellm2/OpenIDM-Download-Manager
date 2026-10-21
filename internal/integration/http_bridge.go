@@ -119,6 +119,9 @@ func (b *BridgeServer) Start(addr string) error {
 	mux.HandleFunc("/api/installer/install", b.withCORS(b.handleInstallerInstall))
 	mux.HandleFunc("/api/installer/open-extension-folder", b.withCORS(b.handleOpenExtensionFolder))
 	mux.HandleFunc("/api/installer/launch-extension", b.withCORS(b.handleLaunchExtension))
+	mux.HandleFunc("/api/update/check", b.withCORS(b.handleUpdateCheck))
+	mux.HandleFunc("/api/update/postpone", b.withCORS(b.handleUpdatePostpone))
+	mux.HandleFunc("/api/update/apply", b.withCORS(b.handleUpdateApply))
 
 	b.httpSrv = &http.Server{
 		Addr:              addr,
@@ -790,6 +793,123 @@ func (b *BridgeServer) handleLaunchExtension(w http.ResponseWriter, r *http.Requ
 	writeJSON(w, http.StatusOK, map[string]any{
 		"ok":           true,
 		"extensionDir": status.ExtensionDir,
+	})
+}
+
+func (b *BridgeServer) handleUpdateCheck(w http.ResponseWriter, r *http.Request) {
+	manual := r.URL.Query().Get("manual") == "true" || r.URL.Query().Get("manual") == "1"
+	var postponedUntil int64
+	if b.store != nil {
+		if cfg, err := b.store.GetSettings(); err == nil {
+			postponedUntil = cfg.UpdatePostponedUntil
+		}
+	}
+	info, err := CheckForUpdate(r.Context(), "", AppVersion, postponedUntil)
+	if err != nil {
+		writeJSON(w, http.StatusBadGateway, map[string]string{"error": err.Error()})
+		return
+	}
+	if manual {
+		info.Postponed = false
+	}
+	writeJSON(w, http.StatusOK, info)
+}
+
+func (b *BridgeServer) handleUpdatePostpone(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	until := time.Now().Add(24 * time.Hour).Unix()
+	if b.store != nil {
+		if cfg, err := b.store.GetSettings(); err == nil {
+			cfg.UpdatePostponedUntil = until
+			_ = b.store.SaveSettings(cfg)
+			if b.onSettingsUpdated != nil {
+				b.onSettingsUpdated(cfg)
+			}
+		}
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"ok":                   true,
+		"updatePostponedUntil": until,
+	})
+}
+
+func (b *BridgeServer) handleUpdateApply(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		DownloadURL string `json:"downloadUrl"`
+		AssetName   string `json:"assetName"`
+	}
+	_ = json.NewDecoder(r.Body).Decode(&req)
+
+	var postponedUntil int64
+	if b.store != nil {
+		if cfg, err := b.store.GetSettings(); err == nil {
+			postponedUntil = cfg.UpdatePostponedUntil
+		}
+	}
+
+	dlURL := strings.TrimSpace(req.DownloadURL)
+	assetName := strings.TrimSpace(req.AssetName)
+	if dlURL == "" {
+		info, err := CheckForUpdate(r.Context(), "", AppVersion, postponedUntil)
+		if err != nil {
+			writeJSON(w, http.StatusBadGateway, map[string]string{"error": err.Error()})
+			return
+		}
+		dlURL = info.DownloadURL
+		assetName = info.AssetName
+		if dlURL == "" && info.ReleaseURL != "" {
+			writeJSON(w, http.StatusOK, map[string]any{
+				"status":     "opened_release_page",
+				"releaseUrl": info.ReleaseURL,
+			})
+			return
+		}
+	}
+
+	b.Broadcast(SSEEvent{
+		Type: "update_progress",
+		Payload: map[string]any{
+			"percent": 1,
+			"status":  "downloading",
+		},
+	})
+
+	filePath, err := DownloadUpdateAsset(r.Context(), dlURL, assetName, func(pct int, dl int64, total int64) {
+		b.Broadcast(SSEEvent{
+			Type: "update_progress",
+			Payload: map[string]any{
+				"percent":    pct,
+				"downloaded": dl,
+				"total":      total,
+				"status":     "downloading",
+			},
+		})
+	})
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+
+	installDir := DefaultInstallDir()
+	if st := GetInstallationStatus(""); st.InstallDir != "" {
+		installDir = st.InstallDir
+	}
+
+	if err := LaunchDownloadedUpdate(filePath, installDir); err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":   "started",
+		"filePath": filePath,
 	})
 }
 

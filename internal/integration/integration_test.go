@@ -2,6 +2,7 @@ package integration
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"encoding/json"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"openidm/internal/engine"
 	"openidm/internal/models"
@@ -58,6 +60,57 @@ func TestShouldCaptureURL(t *testing.T) {
 	// 6. Download hospedado em CDN externo mas iniciado a partir de página Referer na lista de exceções -> Deve ignorar.
 	if ok, _ := ShouldCaptureDownload("https://cdn-externo.net/instalador.exe", "instalador.exe", "https://app.ignorado.com.br/downloads", "", settings, rules); ok {
 		t.Fatalf("deveria ignorar captura quando o Referer casa com regra de exceção do site")
+	}
+
+	// 7. Links de sites comuns sem arquivo (que antes viravam download.bin) -> Não deve capturar mesmo com "bin" na lista.
+	settingsWithBin := models.AppSettings{
+		CaptureExtensions: []string{"zip", "exe", "mp4", "bin", "ts", "txt", "md"},
+		IgnoreModifierKey: "ALT",
+	}
+	for _, siteURL := range []string{
+		"https://google.com",
+		"https://www.meusite.com.br/",
+		"https://github.com/wailsapp/wails",
+		"https://github.com/wailsapp/wails/tree/master/internal",
+		"https://exemplo.com/src/index.ts",
+	} {
+		if ok, reason := ShouldCaptureURL(siteURL, "", settingsWithBin, rules); ok {
+			t.Fatalf("não deveria capturar link de site/código %q (motivo retornado: %s)", siteURL, reason)
+		}
+	}
+
+	// 8. Links de localhost / 127.0.0.1 / rede local (inclusive vídeos locais) -> Não deve capturar.
+	for _, localURL := range []string{
+		"http://localhost:3000",
+		"http://localhost:3000/video.mp4",
+		"http://127.0.0.1:5173/assets/demo.mp4",
+		"http://192.168.1.50:8080/stream.mp4",
+	} {
+		if ok, reason := ShouldCaptureURL(localURL, "", settingsWithBin, rules); ok {
+			t.Fatalf("não deveria capturar link local %q (motivo: %s)", localURL, reason)
+		}
+		if ok, reason := ShouldCaptureBrowserDownload(localURL, "video.mp4", "http://localhost:3000", "", settingsWithBin, rules); ok {
+			t.Fatalf("ShouldCaptureBrowserDownload não deveria capturar link local %q (motivo: %s)", localURL, reason)
+		}
+	}
+
+	// 9. Rota oficial de teste de instalação do OpenIDM em 127.0.0.1:41820/api/test-download/ -> Deve continuar funcionando.
+	testDL := "http://127.0.0.1:41820/api/test-download/OpenIDM_Teste_Instalacao.zip"
+	if ok, _ := ShouldCaptureURL(testDL, "", settingsWithBin, rules); !ok {
+		t.Fatalf("deveria permitir o link oficial de teste de instalação (/api/test-download/)")
+	}
+
+	// 10. Links de vídeos do YouTube, Vimeo, Twitch, TikTok, Instagram -> Não deve capturar.
+	for _, videoSite := range []string{
+		"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+		"https://youtu.be/dQw4w9WgXcQ",
+		"https://vimeo.com/123456789",
+		"https://www.twitch.tv/videos/123456",
+		"https://www.tiktok.com/@user/video/123456",
+	} {
+		if ok, reason := ShouldCaptureURL(videoSite, "", settingsWithBin, rules); ok {
+			t.Fatalf("não deveria capturar link de plataforma de vídeo %q (motivo: %s)", videoSite, reason)
+		}
 	}
 }
 
@@ -373,6 +426,89 @@ func TestBridgeHealthAndLanguageSettings(t *testing.T) {
 	_ = json.Unmarshal(rec6.Body.Bytes(), &pingResp)
 	if pingResp.Language != models.LangEnUS {
 		t.Fatalf("esperava Language='en-US' no retorno de ping da extensão, obteve %q", pingResp.Language)
+	}
+}
+
+// TestSelfUpdaterGitHubReleaseAndPostpone valida a comparação semver, busca de release do GitHub,
+// download do instalador e adiamento por 24 horas.
+func TestSelfUpdaterGitHubReleaseAndPostpone(t *testing.T) {
+	if CompareVersions("1.0.0", "1.0.0") != 0 {
+		t.Fatalf("1.0.0 vs 1.0.0 deveria ser 0")
+	}
+	if CompareVersions("1.0.0", "v1.1.0") >= 0 {
+		t.Fatalf("1.0.0 vs v1.1.0 deveria ser < 0")
+	}
+	if CompareVersions("v1.2.0", "1.1.9") <= 0 {
+		t.Fatalf("v1.2.0 vs 1.1.9 deveria ser > 0")
+	}
+
+	// Servidor HTTP simulando GitHub Releases API + download do asset
+	var serverURL string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/downloads/OpenIDM-Setup.exe" {
+			w.Header().Set("Content-Length", "16")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("MZ-SETUP-PAYLOAD"))
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{
+			"tag_name":     "v1.2.0",
+			"name":         "OpenIDM v1.2.0",
+			"body":         "Melhorias de captura e atualizador integrado",
+			"html_url":     serverURL + "/releases/tag/v1.2.0",
+			"published_at": "2026-10-21T12:00:00Z",
+			"assets": []map[string]any{
+				{
+					"name":                 "OpenIDM-Setup.exe",
+					"size":                 16,
+					"browser_download_url": serverURL + "/downloads/OpenIDM-Setup.exe",
+				},
+			},
+		})
+	}))
+	defer srv.Close()
+	serverURL = srv.URL
+
+	mockAPIURL := srv.URL + "/repos/rafaellm2/OpenIDM-Download-Manager/releases/latest"
+
+	// 1. Verifica detecção de nova versão v1.2.0 > 1.0.0
+	info, err := CheckForUpdate(context.Background(), mockAPIURL, "1.0.0", 0)
+	if err != nil {
+		t.Fatalf("erro em CheckForUpdate: %v", err)
+	}
+	if !info.Available || info.LatestVersion != "1.2.0" || info.AssetName != "OpenIDM-Setup.exe" {
+		t.Fatalf("UpdateInfo inesperado: %+v", info)
+	}
+	if info.Postponed {
+		t.Fatalf("não deveria estar adiado quando postponedUntil=0")
+	}
+
+	// 2. Verifica estado adiado por 24h (postponedUntil no futuro)
+	future := time.Now().Add(24 * time.Hour).Unix()
+	infoPostponed, err := CheckForUpdate(context.Background(), mockAPIURL, "1.0.0", future)
+	if err != nil {
+		t.Fatalf("erro em CheckForUpdate com adiamento: %v", err)
+	}
+	if !infoPostponed.Available || !infoPostponed.Postponed {
+		t.Fatalf("esperava Available=true e Postponed=true, obteve %+v", infoPostponed)
+	}
+
+	// 3. Verifica download do asset de atualização
+	var lastPct int
+	downloadedPath, err := DownloadUpdateAsset(context.Background(), info.DownloadURL, info.AssetName, func(pct int, dl int64, total int64) {
+		lastPct = pct
+	})
+	if err != nil {
+		t.Fatalf("erro em DownloadUpdateAsset: %v", err)
+	}
+	defer os.Remove(downloadedPath)
+
+	rawBytes, err := os.ReadFile(downloadedPath)
+	if err != nil || string(rawBytes) != "MZ-SETUP-PAYLOAD" {
+		t.Fatalf("conteúdo baixado inválido: %q (err=%v)", string(rawBytes), err)
+	}
+	if lastPct < 100 {
+		t.Fatalf("progresso final esperado 100%%, obteve %d%%", lastPct)
 	}
 }
 

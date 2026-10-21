@@ -169,6 +169,9 @@ export const TRANSLATIONS = {
       optionsTitle: "Configurações gerais, idioma e conexões",
       installer: "Instalador & Extensão",
       installerTitle: "Instalação & Integração com o Navegador",
+      update: "Atualizar",
+      updateAvailableBadge: "Nova!",
+      updateTitle: "Verificar atualizações do OpenIDM no GitHub",
       speedTooltip: "Velocidade agregada em tempo real",
       activeCountLabel: (count: number, speed: string) => `${count} ativo(s) • ${speed}`,
       idleLabel: "Ocioso • 0 B/s",
@@ -439,7 +442,7 @@ export const TRANSLATIONS = {
       saveSettingsBtn: "💾 Salvar Configurações"
     },
     installerModal: {
-      title: "Instalador Oficial — OpenIDM (v1.0.0)",
+      title: "Instalador Oficial — OpenIDM (v1.0.1)",
       subtitle: "Configura a inicialização com o Windows, atalhos de acesso rápido e integração com os navegadores",
       startingMsg: "Iniciando instalação do OpenIDM no Windows...",
       completedMsg: "Instalação concluída com sucesso!",
@@ -475,6 +478,28 @@ export const TRANSLATIONS = {
       closeBtn: "Fechar",
       installingBtn: "⏳ Instalando...",
       installBtn: "Instalar OpenIDM"
+    },
+    updateModal: {
+      title: "Atualização do OpenIDM",
+      subtitle: "Verificação direta de novos releases oficiais no GitHub",
+      checkingMsg: "Consultando última versão no GitHub...",
+      upToDateTitle: "✔ Seu OpenIDM está atualizado!",
+      upToDateDesc: (ver: string) => `Você já está executando a versão mais recente (v${ver}).`,
+      availableTitle: (ver: string) => `🚀 Nova versão v${ver} disponível!`,
+      availableSubtitle: (cur: string, latest: string) => `Versão instalada: v${cur}  →  Nova versão: v${latest}`,
+      releaseNotesLabel: "Novidades da versão (Release Notes):",
+      noReleaseNotes: "Melhorias de estabilidade, desempenho e correções gerais.",
+      assetInfoLabel: (name: string, size: string) => `Pacote: ${name}${size ? ` (${size})` : ""}`,
+      downloadingMsg: (pct: string) => `Baixando atualização... ${pct}%`,
+      launchingMsg: "Aplicando atualização e reiniciando o OpenIDM...",
+      postponedMsg: "Notificação de atualização adiada por 24 horas.",
+      checkAgainBtn: "🔄 Verificar Novamente",
+      viewOnGitHubBtn: "🌐 Ver no GitHub",
+      postpone24hBtn: "🕓 Adiar por 24h",
+      postpone24hTitle: "Não perguntar novamente pelas próximas 24 horas",
+      updateNowBtn: "⬇ Atualizar Agora",
+      updatingBtn: "⏳ Atualizando...",
+      closeBtn: "Fechar"
     }
   },
   "en-US": {
@@ -498,6 +523,9 @@ export const TRANSLATIONS = {
       optionsTitle: "General settings, language and connections",
       installer: "Installer & Extension",
       installerTitle: "System Installation & Browser Integration",
+      update: "Update",
+      updateAvailableBadge: "New!",
+      updateTitle: "Check for OpenIDM updates on GitHub",
       speedTooltip: "Real-time aggregate download speed",
       activeCountLabel: (count: number, speed: string) => `${count} active • ${speed}`,
       idleLabel: "Idle • 0 B/s",
@@ -767,7 +795,7 @@ export const TRANSLATIONS = {
       saveSettingsBtn: "💾 Save Settings"
     },
     installerModal: {
-      title: "Official Installer — OpenIDM (v1.0.0)",
+      title: "Official Installer — OpenIDM (v1.0.1)",
       subtitle: "Configures Windows startup, quick-access shortcuts and browser extension integration",
       startingMsg: "Starting OpenIDM installation on Windows...",
       completedMsg: "Installation completed successfully!",
@@ -803,6 +831,28 @@ export const TRANSLATIONS = {
       closeBtn: "Close",
       installingBtn: "⏳ Installing...",
       installBtn: "Install OpenIDM"
+    },
+    updateModal: {
+      title: "OpenIDM Software Update",
+      subtitle: "Direct check for official new releases on GitHub",
+      checkingMsg: "Checking latest version on GitHub...",
+      upToDateTitle: "✔ OpenIDM is up to date!",
+      upToDateDesc: (ver: string) => `You are already running the latest version (v${ver}).`,
+      availableTitle: (ver: string) => `🚀 New version v${ver} available!`,
+      availableSubtitle: (cur: string, latest: string) => `Installed version: v${cur}  →  New version: v${latest}`,
+      releaseNotesLabel: "What's new (Release Notes):",
+      noReleaseNotes: "Stability improvements, performance enhancements and bug fixes.",
+      assetInfoLabel: (name: string, size: string) => `Package: ${name}${size ? ` (${size})` : ""}`,
+      downloadingMsg: (pct: string) => `Downloading update... ${pct}%`,
+      launchingMsg: "Applying update and restarting OpenIDM...",
+      postponedMsg: "Update notification postponed for 24 hours.",
+      checkAgainBtn: "🔄 Check Again",
+      viewOnGitHubBtn: "🌐 View on GitHub",
+      postpone24hBtn: "🕓 Postpone 24h",
+      postpone24hTitle: "Snooze automatic update prompt for the next 24 hours",
+      updateNowBtn: "⬇ Update Now",
+      updatingBtn: "⏳ Updating...",
+      closeBtn: "Close"
     }
   }
 };

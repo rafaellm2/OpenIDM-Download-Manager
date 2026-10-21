@@ -134,6 +134,31 @@ export interface AppSettings {
   cardPosX?: number;
   cardPosY?: number;
   cardPosSaved?: boolean;
+  updatePostponedUntil?: number;
+}
+
+export interface UpdateInfo {
+  available: boolean;
+  currentVersion: string;
+  latestVersion: string;
+  tagName: string;
+  releaseName: string;
+  releaseNotes: string;
+  releaseUrl: string;
+  downloadUrl: string;
+  assetName: string;
+  assetSize: number;
+  publishedAt: string;
+  postponed: boolean;
+  postponedUntil?: number;
+}
+
+export interface UpdateProgress {
+  downloadedBytes: number;
+  totalBytes: number;
+  percent: number;
+  status: "downloading" | "launching" | "completed" | "error";
+  message?: string;
 }
 
 export interface AddDownloadRequest {

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "OpenIDM - Captura Avançada de Downloads",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Integra o navegador (Chrome/Edge/Firefox) ao OpenIDM via Native Messaging e intercepta downloads automaticamente.",
   "permissions": [
     "downloads",

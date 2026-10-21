@@ -271,7 +271,7 @@ const setupWizardHTML = `<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="theme-color" content="#141413" />
   <link rel="icon" type="image/png" href="/api/icon.png" />
-  <title>Instalador Oficial — OpenIDM (v1.0.0)</title>
+  <title>Instalador Oficial — OpenIDM (v1.0.1)</title>
   <style>
     :root {
       --bg: #141413;
@@ -474,7 +474,7 @@ const setupWizardHTML = `<!DOCTYPE html>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
         <button class="btn secondary" id="langBtn" onclick="toggleLang()" style="padding:5px 10px; font-size:11.5px; border-radius:999px;">🌐 PT / EN</button>
-        <span class="badge">v1.0.0</span>
+        <span class="badge">v1.0.1</span>
       </div>
     </div>
 
@@ -544,7 +544,7 @@ const setupWizardHTML = `<!DOCTYPE html>
 
     const I18N = {
       "pt-BR": {
-        docTitle: "Instalador Oficial — OpenIDM (v1.0.0)",
+        docTitle: "Instalador Oficial — OpenIDM (v1.0.1)",
         headerTitle: "Instalador Oficial — OpenIDM",
         headerSub: "Gerenciador de Downloads de Alta Velocidade para Windows",
         dirLabel: "Pasta de Destino da Instalação no Windows:",
@@ -568,7 +568,7 @@ const setupWizardHTML = `<!DOCTYPE html>
         failPrefix: "Falha: "
       },
       "en-US": {
-        docTitle: "Official Installer — OpenIDM (v1.0.0)",
+        docTitle: "Official Installer — OpenIDM (v1.0.1)",
         headerTitle: "Official Installer — OpenIDM",
         headerSub: "High-Speed Multi-Segment Download Manager for Windows",
         dirLabel: "Windows Installation Destination Folder:",

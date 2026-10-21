@@ -5,7 +5,8 @@ Official standalone installers organized by version. Each folder includes the x6
 
 | Versão / Version | Data / Date | Instalador / Installer | Notas / Notes |
 |---|---|---|---|
-| **1.0.0** *(Latest)* | 2026-10-19 | [OpenIDM-Setup-1.0.0-x64.exe](v1.0.0/OpenIDM-Setup-1.0.0-x64.exe) | [Changelog — Lançamento Oficial Bilíngue (PT-BR & EN-US)](../CHANGELOG.md#100--2026-10-19) |
+| **1.0.1** *(Latest)* | 2026-10-21 | [OpenIDM-Setup-1.0.1-x64.exe](v1.0.1/OpenIDM-Setup-1.0.1-x64.exe) | [Changelog — Atualizador Integrado (GitHub Releases) & Filtros de Captura](../CHANGELOG.md#101--2026-10-21) |
+| **1.0.0** | 2026-10-19 | [OpenIDM-Setup-1.0.0-x64.exe](v1.0.0/OpenIDM-Setup-1.0.0-x64.exe) | [Changelog — Lançamento Oficial Bilíngue (PT-BR & EN-US)](../CHANGELOG.md#100--2026-10-19) |
 
 ## Requisitos / Requirements
 
@@ -15,11 +16,11 @@ Official standalone installers organized by version. Each folder includes the x6
 
 ## Instalação / Installation
 
-1. Baixe o `OpenIDM-Setup-1.0.0-x64.exe` / Download `OpenIDM-Setup-1.0.0-x64.exe`.
+1. Baixe o `OpenIDM-Setup-1.0.1-x64.exe` / Download `OpenIDM-Setup-1.0.1-x64.exe`.
 2. Verifique a integridade (opcional) / Verify SHA-256 checksum (optional):
 
    ```powershell
-   Get-FileHash .\OpenIDM-Setup-1.0.0-x64.exe -Algorithm SHA256
+   Get-FileHash .\OpenIDM-Setup-1.0.1-x64.exe -Algorithm SHA256
    ```
 
    O resultado deve ser igual ao valor em `SHA256SUMS.txt` / The hash must match `SHA256SUMS.txt`.
@@ -28,8 +29,8 @@ Official standalone installers organized by version. Each folder includes the x6
 Instalação silenciosa / Silent installation:
 
 ```powershell
-.\OpenIDM-Setup-1.0.0-x64.exe --silent
-.\OpenIDM-Setup-1.0.0-x64.exe --silent --install-dir "D:\Apps\OpenIDM" --launch-app
+.\OpenIDM-Setup-1.0.1-x64.exe --silent
+.\OpenIDM-Setup-1.0.1-x64.exe --silent --install-dir "D:\Apps\OpenIDM" --launch-app
 ```
 
 Desinstalação / Uninstallation: **Configurações → Aplicativos → OpenIDM → Desinstalar** (Windows Installed Apps), ou `openidm.exe --uninstall`.

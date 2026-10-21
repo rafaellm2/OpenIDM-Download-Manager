@@ -8,6 +8,7 @@ import { SettingsModal } from "./components/SettingsModal";
 import { Sidebar, SidebarFilter } from "./components/Sidebar";
 import { StandaloneProgressCard } from "./components/StandaloneProgressCard";
 import { Toolbar } from "./components/Toolbar";
+import { UpdateModal } from "./components/UpdateModal";
 import {
   getActiveLanguage,
   LanguageProvider,
@@ -24,7 +25,8 @@ import {
   Download,
   Queue,
   SiteLogin,
-  SiteRule
+  SiteRule,
+  UpdateInfo
 } from "./types";
 
 const AppContent: React.FC<{
@@ -64,6 +66,8 @@ const AppContent: React.FC<{
   const [showScheduler, setShowScheduler] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showInstaller, setShowInstaller] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
 
   // Insere ou atualiza um link capturado na fila de captura
   const enqueuePrompt = useCallback((prompt: CapturePrompt) => {
@@ -267,6 +271,14 @@ const AppContent: React.FC<{
       } else if (ev.type === "open_installer") {
         setWindowMode("full");
         setShowInstaller(true);
+      } else if (ev.type === "update_available" && ev.payload) {
+        const info = ev.payload as UpdateInfo;
+        setUpdateInfo(info);
+        if (info.available && !info.postponed) {
+          setWindowMode("full");
+          setShowUpdateModal(true);
+          api.showWindow().catch(() => {});
+        }
       }
     });
 
@@ -676,6 +688,8 @@ const AppContent: React.FC<{
         }}
         onOpenSettings={() => setShowSettings(true)}
         onOpenInstaller={() => setShowInstaller(true)}
+        onOpenUpdater={() => setShowUpdateModal(true)}
+        updateAvailable={Boolean(updateInfo?.available)}
         onHideToTray={() => {
           api.hideToTray();
         }}
@@ -843,6 +857,14 @@ const AppContent: React.FC<{
           onInstalled={() => {
             loadAll();
           }}
+        />
+      )}
+
+      {showUpdateModal && (
+        <UpdateModal
+          initialInfo={updateInfo}
+          onClose={() => setShowUpdateModal(false)}
+          onUpdateInfoChanged={(next) => setUpdateInfo(next)}
         />
       )}
     </div>

@@ -33,7 +33,7 @@ O OpenIDM conta com suporte nativo a **Português (`pt-BR`)** e **Inglês (`en-U
 
 | Área | O que faz |
 |---|---|
-| **Barra de ferramentas** | Capturar Link, Retomar, Pausar, Parar Tudo, Excluir, Limpar Concluídos, Agendador, Opções e Instalador & Extensão |
+| **Barra de ferramentas** | Capturar Link, Retomar, Pausar, Parar Tudo, Excluir, Limpar Concluídos, Agendador, Opções, Instalador & Extensão e Atualizar |
 | **Indicador de atividade** | Quantidade de downloads ativos e velocidade total em tempo real |
 | **Filtro** | Busca instantânea por nome do arquivo ou URL |
 | **Card Solto / Minimizar para a Bandeja** | Alterna para o modo compacto ou esconde a janela, mantendo os downloads rodando |
@@ -196,8 +196,9 @@ Executável: C:\Program Files\Windows Defender\MpCmdRun.exe
 Parâmetros: -Scan -ScanType 3 -File "[file]"
 ```
 
-### Integração
-Instalação do Native Messaging Host e acesso ao assistente da extensão.
+### Integração e Atualizações
+- Instalação do Native Messaging Host e acesso ao assistente da extensão.
+- **Botão `🔄 Atualizar` na Barra de Ferramentas**: verifica imediatamente no GitHub se há uma nova versão do OpenIDM. Quando um novo release sai no GitHub, o aplicativo também avisa automaticamente permitindo **Atualizar Agora** (baixa e instala sozinho) ou **Adiar por 24h**.
 
 ---
 

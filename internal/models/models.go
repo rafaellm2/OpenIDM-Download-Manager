@@ -175,6 +175,7 @@ type AppSettings struct {
 	CardPosX                  int      `json:"cardPosX,omitempty"`
 	CardPosY                  int      `json:"cardPosY,omitempty"`
 	CardPosSaved              bool     `json:"cardPosSaved,omitempty"`
+	UpdatePostponedUntil      int64    `json:"updatePostponedUntil,omitempty"` // Timestamp Unix até quando o alerta de update foi adiado (24h)
 }
 
 const (

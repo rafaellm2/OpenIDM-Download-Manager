@@ -230,6 +230,26 @@ func (a *App) Startup(ctx context.Context) {
 		}
 	}()
 
+	// Monitora periodicamente em background se há uma nova release publicada no GitHub (respeitando adiamento de 24h).
+	go func() {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(3 * time.Second):
+			_, _ = a.CheckForUpdates(false)
+		}
+		ticker := time.NewTicker(6 * time.Hour)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				_, _ = a.CheckForUpdates(false)
+			}
+		}
+	}()
+
 	// Verifica se o executável foi chamado passando uma URL via linha de comando.
 	for _, arg := range os.Args[1:] {
 		clean := strings.TrimSpace(arg)
@@ -247,28 +267,45 @@ func (a *App) Startup(ctx context.Context) {
 	}
 }
 
-// ensureExtendedCaptureSettings sincroniza novas extensões nas configurações globais e nas categorias do SQLite.
+// ensureExtendedCaptureSettings sincroniza novas extensões nas configurações globais e nas categorias do SQLite,
+// removendo extensões ambíguas (.bin, .ts, .txt, .md) da captura automática de clipboard para evitar falsos-positivos.
 func (a *App) ensureExtendedCaptureSettings() {
 	cfg, err := a.store.GetSettings()
 	if err == nil {
+		noisyExts := map[string]bool{
+			"bin": true,
+			"ts":  true,
+			"txt": true,
+			"md":  true,
+		}
 		extraExts := []string{
-			"safetensors", "gguf", "ckpt", "pt", "pth", "onnx", "bin", "whl",
+			"safetensors", "gguf", "ckpt", "pt", "pth", "onnx", "whl",
 			"bz2", "xz", "tgz", "zst", "img", "dmg", "deb", "rpm", "torrent",
-			"doc", "xls", "ppt", "epub", "csv", "txt", "md",
+			"doc", "xls", "ppt", "epub", "csv",
 		}
+		filtered := make([]string, 0, len(cfg.CaptureExtensions))
 		existing := make(map[string]bool, len(cfg.CaptureExtensions))
-		for _, e := range cfg.CaptureExtensions {
-			existing[strings.ToLower(strings.TrimPrefix(e, "."))] = true
-		}
 		changed := false
+		for _, e := range cfg.CaptureExtensions {
+			norm := strings.ToLower(strings.TrimPrefix(strings.TrimSpace(e), "."))
+			if norm == "" || noisyExts[norm] {
+				changed = true
+				continue
+			}
+			if !existing[norm] {
+				filtered = append(filtered, norm)
+				existing[norm] = true
+			}
+		}
 		for _, ext := range extraExts {
 			if !existing[ext] {
-				cfg.CaptureExtensions = append(cfg.CaptureExtensions, ext)
+				filtered = append(filtered, ext)
 				existing[ext] = true
 				changed = true
 			}
 		}
 		if changed {
+			cfg.CaptureExtensions = filtered
 			_ = a.store.SaveSettings(cfg)
 		}
 	}
@@ -1054,13 +1091,23 @@ func (a *App) buildCapturePrompt(rawURL, customName, referrer, source string) *m
 	}
 }
 
-// GetClipboardURL verifica se há uma URL HTTP/HTTPS/FTP na área de transferência do Windows.
+// GetClipboardURL verifica se há uma URL de download válida (filtrando sites comuns, localhost e vídeos web) na área de transferência.
 func (a *App) GetClipboardURL() string {
 	txt := integration.ReadClipboardText()
-	if isSupportedDownloadURL(txt) {
-		return txt
+	if !isSupportedDownloadURL(txt) {
+		return ""
 	}
-	return ""
+	normalized := engine.NormalizeDownloadURL(txt)
+	if a.store != nil {
+		settings, err := a.store.GetSettings()
+		if err == nil {
+			rules, _ := a.store.ListSiteRules()
+			if ok, _ := integration.ShouldCaptureURL(normalized, "", settings, rules); !ok {
+				return ""
+			}
+		}
+	}
+	return normalized
 }
 
 // BrowseFolder abre o seletor nativo de pastas do Windows Explorer para o usuário escolher onde salvar.
@@ -1579,6 +1626,171 @@ func (a *App) OpenExtensionFolder() (string, error) {
 		_ = exec.Command("explorer.exe", status.ExtensionDir).Start()
 	}
 	return status.ExtensionDir, nil
+}
+
+// CheckForUpdates consulta o GitHub Releases para verificar se há uma nova versão do OpenIDM disponível.
+// Quando manual=false (verificação automática em background), respeita o adiamento de 24 horas escolhido pelo usuário.
+func (a *App) CheckForUpdates(manual bool) (*integration.UpdateInfo, error) {
+	var postponedUntil int64
+	if a.store != nil {
+		if cfg, err := a.store.GetSettings(); err == nil {
+			postponedUntil = cfg.UpdatePostponedUntil
+		}
+	}
+
+	ctx := a.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	info, err := integration.CheckForUpdate(ctx, "", integration.AppVersion, postponedUntil)
+	if err != nil {
+		return nil, err
+	}
+
+	if info != nil && info.Available && (manual || !info.Postponed) {
+		a.emitEvent("update_available", info)
+		if !manual {
+			a.captureMu.Lock()
+			wasHidden := a.windowHidden
+			a.captureMu.Unlock()
+			if wasHidden {
+				if a.tray != nil {
+					if a.currentLanguage() == "en-US" {
+						a.tray.ShowBalloon(
+							"New Update Available — OpenIDM v"+info.LatestVersion,
+							"A new release is available on GitHub. Confirm to update now or postpone for 24h.",
+						)
+					} else {
+						a.tray.ShowBalloon(
+							"Nova Atualização Disponível — OpenIDM v"+info.LatestVersion,
+							"Saiu uma nova versão no GitHub. Confirme para atualizar agora ou adiar por 24h.",
+						)
+					}
+				}
+				go a.ShowWindow()
+			}
+		}
+	}
+	return info, nil
+}
+
+// PostponeUpdate adia as notificações automáticas de atualização por 24 horas a partir do momento atual.
+func (a *App) PostponeUpdate() (int64, error) {
+	until := time.Now().Add(24 * time.Hour).Unix()
+	if a.store != nil {
+		cfg, err := a.store.GetSettings()
+		if err != nil {
+			return until, err
+		}
+		cfg.UpdatePostponedUntil = until
+		if err := a.store.SaveSettings(cfg); err != nil {
+			return until, err
+		}
+	}
+	a.emitEvent("update_postponed", map[string]any{"postponedUntil": until})
+	return until, nil
+}
+
+// StartSelfUpdate baixa o instalador da nova release do GitHub emitindo progresso em tempo real e inicia a atualização.
+func (a *App) StartSelfUpdate(downloadURL string, assetName string) (map[string]any, error) {
+	ctx := a.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	cleanURL := strings.TrimSpace(downloadURL)
+	cleanAsset := strings.TrimSpace(assetName)
+	var releasePageURL string
+
+	if cleanURL == "" {
+		info, err := integration.CheckForUpdate(ctx, "", integration.AppVersion, 0)
+		if err != nil {
+			return nil, err
+		}
+		if info != nil {
+			cleanURL = strings.TrimSpace(info.DownloadURL)
+			cleanAsset = strings.TrimSpace(info.AssetName)
+			releasePageURL = strings.TrimSpace(info.ReleaseURL)
+		}
+	}
+
+	// Se a release no GitHub não tiver um instalador .exe anexado diretamente, abre a página da release no navegador.
+	if cleanURL == "" {
+		if releasePageURL == "" {
+			releasePageURL = integration.DefaultGitHubReleasesPage
+		}
+		_ = a.OpenExternalURL(releasePageURL)
+		return map[string]any{
+			"started":       false,
+			"openedBrowser": true,
+			"releaseUrl":    releasePageURL,
+		}, nil
+	}
+
+	isEN := a.currentLanguage() == "en-US"
+	msgDownloading := "Baixando atualização do GitHub..."
+	msgApplying := "Iniciando instalador da nova versão..."
+	if isEN {
+		msgDownloading = "Downloading update from GitHub..."
+		msgApplying = "Launching new version installer..."
+	}
+
+	a.emitEvent("update_progress", map[string]any{
+		"percent":    5,
+		"downloaded": 0,
+		"total":      0,
+		"status":     "downloading",
+		"message":    msgDownloading,
+	})
+
+	downloadedPath, err := integration.DownloadUpdateAsset(ctx, cleanURL, cleanAsset, func(pct int, dl int64, total int64) {
+		a.emitEvent("update_progress", map[string]any{
+			"percent":    pct,
+			"downloaded": dl,
+			"total":      total,
+			"status":     "downloading",
+			"message":    msgDownloading,
+		})
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	a.emitEvent("update_progress", map[string]any{
+		"percent":    100,
+		"downloaded": 0,
+		"total":      0,
+		"status":     "applying",
+		"message":    msgApplying,
+	})
+
+	st := integration.GetInstallationStatus("")
+	if err := integration.LaunchDownloadedUpdate(downloadedPath, st.InstallDir); err != nil {
+		return nil, err
+	}
+
+	// Encerra a instância atual após um breve intervalo para permitir que o instalador substitua o binário e reinicie o app.
+	go func() {
+		time.Sleep(500 * time.Millisecond)
+		a.QuitApp()
+	}()
+
+	return map[string]any{
+		"started":        true,
+		"downloadedPath": downloadedPath,
+	}, nil
+}
+
+// OpenExternalURL abre uma URL externa (ex: página de release no GitHub) no navegador padrão do sistema.
+func (a *App) OpenExternalURL(targetURL string) error {
+	clean := strings.TrimSpace(targetURL)
+	if !strings.HasPrefix(strings.ToLower(clean), "http://") && !strings.HasPrefix(strings.ToLower(clean), "https://") {
+		return nil
+	}
+	if runtime.GOOS == "windows" {
+		return exec.Command("rundll32", "url.dll,FileProtocolHandler", clean).Start()
+	}
+	return exec.Command("xdg-open", clean).Start()
 }
 
 // localizeDefaultCategoryName traduz nomes de categorias padrão do banco quando o idioma ativo é inglês,

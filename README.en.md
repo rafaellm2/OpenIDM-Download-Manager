@@ -89,6 +89,7 @@ Not a single line of third-party proprietary code or binary is reused: the downl
 - **Compact Card (Standalone Card)** — a compact floating window to confirm new downloads and track active transfers without cluttering your screen.
 - **System Tray** — runs quietly in the background with a localized context menu and native balloon notifications.
 - **Single-Instance Lock** — opening new links hands them off cleanly to the running instance.
+- **Built-in Self-Updater (GitHub Releases)** — **🔄 Update** button on the toolbar plus automatic background checks, letting you **Update Now** (downloads and installs automatically) or **Postpone for 24h**.
 - **Built-in Graphical Installer** with desktop/Start Menu shortcuts, Windows startup registration, uninstaller, and browser extension setup wizard.
 
 ---
@@ -255,10 +256,11 @@ Full build instructions: [docs/BUILDING.md](docs/BUILDING.md).
 - [x] **Phase 1** — Engine: dynamic segmentation, connection reuse, crash-safe resume, FTP, and proxy support
 - [x] **Phase 2** — Capture: Manifest V3 extension, Native Messaging, clipboard monitor, and per-site rules
 - [x] **Phase 3** — Organization: categories, queues, scheduler, ETag synchronization, and antivirus integration
-- [x] **Internationalization** — Full English (`en-US`) and Brazilian Portuguese (`pt-BR`) support across app, tray, installer, extension, and docs (v1.0.1)
+- [x] **Internationalization** — Full English (`en-US`) and Brazilian Portuguese (`pt-BR`) support across app, tray, installer, extension, and docs
+- [x] **In-App Automatic Updater** — GitHub Releases checker with one-click self-update and 24-hour snooze option (v1.0.1)
 - [ ] **Phase 4** — *Site Grabber*: full website spider with depth and file-type filters
 - [ ] **Phase 5** — Video/Streaming: media stream detection, HLS/DASH, and ffmpeg muxing
-- [ ] Code signing and automatic updates
+- [ ] EV Code Signing certificate
 - [ ] Linux and macOS support
 
 ---

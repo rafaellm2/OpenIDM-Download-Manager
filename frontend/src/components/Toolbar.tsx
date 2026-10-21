@@ -22,6 +22,8 @@ interface ToolbarProps {
   onStopMainQueue?: () => void;
   onOpenSettings: () => void;
   onOpenInstaller: () => void;
+  onOpenUpdater: () => void;
+  updateAvailable?: boolean;
   onHideToTray: () => void;
 }
 
@@ -44,6 +46,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onOpenScheduler,
   onOpenSettings,
   onOpenInstaller,
+  onOpenUpdater,
+  updateAvailable,
   onHideToTray
 }) => {
   const { language, t, toggleLanguage } = useI18n();
@@ -51,7 +55,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   return (
     <header className="toolbar">
       <div className="toolbar-actions">
-        {/* Identificação de versão oficial alinhada em v1.0.0 */}
+        {/* Identificação de versão oficial alinhada em v1.0.1 */}
         <div className="brand-pill" title={t.toolbar.brandTooltip}>
           <span
             className="brand-terminal-badge"
@@ -71,7 +75,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             />
           </span>
           <span className="brand-title">OpenIDM</span>
-          <span className="brand-tag">v1.0.0</span>
+          <span className="brand-tag">v1.0.1</span>
         </div>
 
         {/* Botão principal para adicionar download no Card Solto */}
@@ -158,6 +162,38 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         >
           <span className="tool-icon accent-text">📦</span>
           <span>{t.toolbar.installer}</span>
+        </button>
+
+        <button
+          className="tool-btn"
+          onClick={onOpenUpdater}
+          title={t.toolbar.updateTitle}
+          style={
+            updateAvailable
+              ? {
+                  borderColor: "rgba(244, 182, 1, 0.55)",
+                  background: "rgba(244, 182, 1, 0.12)"
+                }
+              : undefined
+          }
+        >
+          <span className="tool-icon accent-text">🔄</span>
+          <span>{t.toolbar.update}</span>
+          {updateAvailable && (
+            <span
+              style={{
+                marginLeft: 4,
+                padding: "1px 6px",
+                borderRadius: 999,
+                fontSize: 10,
+                fontWeight: 700,
+                background: "#F4B601",
+                color: "#111"
+              }}
+            >
+              {t.toolbar.updateAvailableBadge}
+            </span>
+          )}
         </button>
       </div>
 

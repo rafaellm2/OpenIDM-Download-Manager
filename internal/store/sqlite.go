@@ -280,10 +280,10 @@ func (s *Store) seedDefaults() error {
 		CaptureExtensions: []string{
 			"zip", "rar", "7z", "tar", "gz", "bz2", "xz", "tgz", "zst", "torrent",
 			"exe", "msi", "iso", "img", "apk", "dmg", "deb", "rpm", "bat", "ps1",
-			"safetensors", "gguf", "ckpt", "pt", "pth", "onnx", "bin", "whl",
-			"mp4", "mkv", "webm", "avi", "mov", "flv", "wmv", "m4v", "ts",
+			"safetensors", "gguf", "ckpt", "pt", "pth", "onnx", "whl",
+			"mp4", "mkv", "webm", "avi", "mov", "flv", "wmv", "m4v",
 			"mp3", "flac", "wav", "aac", "ogg", "m4a", "wma", "opus",
-			"pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "csv", "epub", "md",
+			"pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "csv", "epub",
 		},
 		IgnoreModifierKey:     "ALT",
 		ProxyType:             "none",

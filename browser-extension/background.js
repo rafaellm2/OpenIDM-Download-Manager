@@ -154,6 +154,61 @@ function sanitizeBaseFileName(rawName) {
   return base.trim();
 }
 
+// Verifica se uma URL pertence a localhost/LAN ou plataforma de streaming (preservando a rota de teste do OpenIDM).
+function isIgnoredLocalOrStreamingUrl(rawUrl) {
+  if (!rawUrl) return false;
+  try {
+    const u = new URL(rawUrl);
+    if (/\/api\/(test-download|extension-wakeup)/i.test(u.pathname)) {
+      return false;
+    }
+    const h = (u.hostname || "").toLowerCase();
+    if (
+      h === "localhost" ||
+      h === "127.0.0.1" ||
+      h === "::1" ||
+      h === "[::1]" ||
+      h === "0.0.0.0" ||
+      h.endsWith(".localhost") ||
+      h.endsWith(".local") ||
+      /^127\./.test(h) ||
+      /^10\./.test(h) ||
+      /^192\.168\./.test(h) ||
+      /^172\.(1[6-9]|2\d|3[0-1])\./.test(h)
+    ) {
+      return true;
+    }
+    const streamingDomains = [
+      "youtube.com",
+      "youtu.be",
+      "googlevideo.com",
+      "ytimg.com",
+      "twitch.tv",
+      "ttvnw.net",
+      "vimeo.com",
+      "dailymotion.com",
+      "tiktok.com",
+      "instagram.com",
+      "facebook.com",
+      "fb.watch",
+      "twitter.com",
+      "x.com",
+      "netflix.com",
+      "primevideo.com",
+      "disneyplus.com",
+      "spotify.com"
+    ];
+    for (const d of streamingDomains) {
+      if (h === d || h.endsWith("." + d)) {
+        return true;
+      }
+    }
+  } catch (_e) {
+    return false;
+  }
+  return false;
+}
+
 // Verifica se o nome possui uma extensão de arquivo real (e não é script web genérico ou número de versão).
 function hasValidFileExtension(name) {
   const base = sanitizeBaseFileName(name);
@@ -161,7 +216,7 @@ function hasValidFileExtension(name) {
   const m = base.match(/\.([a-z0-9]{2,12})$/i);
   if (!m) return false;
   const ext = m[1].toLowerCase();
-  return !["php", "asp", "aspx", "jsp", "cgi", "do", "action", "html", "htm", "mhtml", "xhtml"].includes(ext);
+  return !["php", "asp", "aspx", "jsp", "cgi", "do", "action", "html", "htm", "mhtml", "xhtml", "js", "mjs", "ts", "tsx", "jsx", "css", "json", "map"].includes(ext);
 }
 
 // Extrai um nome de arquivo candidato a partir da URL original antes do redirecionamento CDN.
@@ -417,6 +472,7 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
   if (!captureEnabled) return;
   if (downloadItem.state && downloadItem.state !== "in_progress") return;
   if (!url || url.startsWith("blob:") || url.startsWith("data:") || url.startsWith("chrome-extension:")) return;
+  if (isIgnoredLocalOrStreamingUrl(url) || (!/\/api\/test-download\//i.test(url) && isIgnoredLocalOrStreamingUrl(downloadItem.referrer))) return;
 
   // Se o usuário segurou ALT nos últimos 2.5 segundos, respeita o bypass.
   const activeModifier = Date.now() - lastModifierTimestamp < 2500 ? lastModifierKey : "";
@@ -462,6 +518,10 @@ if (chrome.downloads.onDeterminingFilename) {
       return;
     }
     if (!url || url.startsWith("blob:") || url.startsWith("data:") || url.startsWith("chrome-extension:")) {
+      suggest();
+      return;
+    }
+    if (isIgnoredLocalOrStreamingUrl(url) || (!/\/api\/test-download\//i.test(url) && isIgnoredLocalOrStreamingUrl(downloadItem.referrer))) {
       suggest();
       return;
     }
